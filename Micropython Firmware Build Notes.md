@@ -41,11 +41,13 @@ Firmware 0 and 1 must be flashed contiguously.
 
 
 ### Optional: Enable external flash
+If you have soldered an SPI flash chip to the underside of the board, or connected one to the pins, you can have MicroPython use that as storage instead of the integrated flash. In both cases, the pins A4 (CS), A5 (SCK), A6 (MISO), and A7 (MOSI) are now in use for SPI.
+
 External SPI flash **enabled**:
 
     #define MICROPY_HW_ENABLE_INTERNAL_FLASH_STORAGE (0)
 
-in mpconfigboard.h .
+in mpconfigboard.h. See [here](https://github.com/mcauser/WEACT_F411CEU6#flash) for details on setting the defined flash chip size (eg 32Mbit, 64Mbit).
 
 ## Flashing Process
 You have a few options in how to upload the firmware.
