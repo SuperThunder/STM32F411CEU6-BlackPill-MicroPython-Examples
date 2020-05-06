@@ -54,6 +54,7 @@ In all cases, you will want to put the board into programming mode by
 3. Release NRST
 4. Release BOOT0
 
+Then you can flash the board:
 
 ### 1) By DFU (with STM32CubeProgrammer)
 - You can also use dfu-util as described in the mcauser repo
@@ -63,3 +64,9 @@ In all cases, you will want to put the board into programming mode by
 
 ### 3) By Serial
 - Connect the board to a serial adapter and use STM32CubeProgrammer or st-flash to upload the firmware
+
+
+## Serial REPL and 'USB drive' of Python files
+After flashing, press the NRST button to reboot the board. 
+
+It should now show up as a ~40KB mass storage device and a COM serial port device when plugged into your PC by USB. The serial port can be connected to at 115200 bps.
