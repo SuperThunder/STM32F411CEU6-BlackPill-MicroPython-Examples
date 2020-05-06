@@ -43,8 +43,9 @@ Firmware 0 and 1 must be flashed contiguously.
 ### Optional: Enable external flash
 External SPI flash **enabled**:
 
-    #define MICROPY_HW_ENABLE_INTERNAL_FLASH_STORAGE (1)
+    #define MICROPY_HW_ENABLE_INTERNAL_FLASH_STORAGE (0)
 
+in mpconfigboard.h .
 
 ## Flashing Process
 You have a few options in how to upload the firmware.
