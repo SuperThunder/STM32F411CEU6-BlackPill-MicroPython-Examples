@@ -1,42 +1,16 @@
-import time
+# Implementation of a shift register with a thread to multiplex the 
+
 import _thread
-import sys
-from micropython import const
-
-#pyb is for stm32 boards only (machine is the generic library)
-import pyb
-
-# COMPONENTS:
-# 1x STM32F411CEU6
-# 2x 74HC595N
-# 1x 16 pin common-anode 4 digit 7 segment display (YSD-439AK2B-35)
+import time
 
 
-# PINS:
-# A3->SER of first shift register
-# A2->RCLK of all shift registers
-# A1->SRCLK of all shift registers
-
-# Shift registers: SRCLR <- Vcc,  OE <- GND    
-# 3.3v to SR Vcc, GND TO GND
-# Link Qh' of previous SR to SER of next one
-# SR output pin connections to 4 digit 7 seg display described in the class
-
-# Remember to use resistors between the digit cathode pins and the display pin
-# (or, a resistor after all the anode pins of the display)
-
-
-# Implementeed but not tested: colon and high-dot functionality
-
-# 200 hz
-LED_CLOCK_HZ = const(200)
-
-print("Shift Register + 4digit7segment")
 
 class FourDigitSevenSegmentShift:
-    def __init__(self, shiftreg):
+    def __init__(self, shiftreg, clkHz = 1000):
         self.SR = shiftreg
         self.DIGITS = "0000" # display thread checks this variable
+
+        self.clk_period_seconds = 1 / clkHz
 
         # TODO: probably better performance and less oddity to do this with timed interrupts
         # or create some kind of _thread wrapper that automatically makes a global var for the thread to check to indicate it should terminate
@@ -146,69 +120,4 @@ class FourDigitSevenSegmentShift:
                 
                 self.SR.shiftOut(data)
 
-                time.sleep(self.SR.clk_period_seconds)
-
-
-
-# class for 74hc595n
-# (chain of one or more)
-class ShiftRegister:
-    def __init__(self, dataPin, clkPin, latchPin, clkHz=1000, chain=1):
-        Pin = pyb.Pin        
-        # init pins
-        self.datapin = Pin(dataPin, Pin.OUT)
-        self.clkpin = Pin(clkPin, Pin.OUT)
-        self.latchpin = Pin(latchPin, Pin.OUT)
-        self.datapin.value(0)
-        self.clkpin.value(0)
-        self.latchpin.value(0)
-        
-        # TODO: store in milliseconds or microseconds as integer?
-        self.clk_period_seconds =  1 / clkHz / 2
-
-        
-    # Shift out by writing on data line and sending clock
-    # data should be a byte array equal to the S.R. chain length
-    def shiftOut(self, data):
-        # ground latchpin while transmitting (thx arduino docs)
-        self.latchpin.off()
-
-        # loop for each byte we want to send
-        # send lower bytes first so that array order results in same order
-        # in the chain of shift registers
-        for byte in reversed(data):
-            # send the byte's bits out
-            for bit in range(0,8):
-                # get bit from data byte
-                # send bits in order 0 1 2 3 4 5 6 7
-                b = (byte >> bit) & 1
-                
-                # send bit on data line
-                self.datapin.value(b)
-
-                # send clock pulse
-                self.clkpin.value(1)
-                #time.sleep(self.clk_period_seconds)
-                self.clkpin.value(0)
-
-        # activate storage->output latch
-        self.latchpin.on()
-
-
-
-def main():
-    sr = ShiftRegister('PA3', 'PA1', 'PA2')
-    display = FourDigitSevenSegmentShift(sr)
-
-    #for i in range(0, 10):
-        #display.show(str(i)*4)
-        #time.sleep(0.5)
-
-    #display.show(digits="三"*4)
-
-    while(True):
-        digits = input("Enter 4 digits to display: ")
-        display.show(digits)
-
-
-main()
+                time.sleep(self.clk_period_seconds)
