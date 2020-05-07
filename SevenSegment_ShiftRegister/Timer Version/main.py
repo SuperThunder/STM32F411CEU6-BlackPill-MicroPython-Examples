@@ -36,7 +36,7 @@ def main():
     print("Shift Register + 4digit7segment with Timer")
 
     sr = ShiftRegister.ShiftRegister('PA3', 'PA1', 'PA2', chain=2)
-    display = FourDigitSevenSegmentShift_Timer.FourDigitSevenSegmentShift(sr)
+    display = FourDigitSevenSegmentShift_Timer.FourDigitSevenSegmentShift(sr, clkHz=1000)
 
     #for i in range(0, 10):
         #display.show(str(i)*4)
