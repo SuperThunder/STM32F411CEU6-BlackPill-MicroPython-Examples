@@ -27,11 +27,16 @@ class ShiftRegister:
             print("Data array of length {cl} does not match specified shift register chain length of {srcl}".format(cl=len(data), srcl=self.chainlength))
             return None
 
+        # NOT ALLOWED WITH TIMER INTERRUPTS:
+        # for byte in reversed(data)
+        # as we are allocating memory for the reversed() and for the 'for x in y' iterator
+
         # loop for each byte we want to send
         # send lower bytes first so that array order results in same order
         # in the chain of shift registers
-        for byte in reversed(data):
+        for i in range(self.chainlength, 0, -1):
             # send the byte's bits out
+            byte = data[i-1]
             for bit in range(0,8):
                 # get bit from data byte
                 # send bits in order 0 1 2 3 4 5 6 7

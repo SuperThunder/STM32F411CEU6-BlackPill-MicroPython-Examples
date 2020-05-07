@@ -44,6 +44,17 @@ def main():
     # .....
     # will not work!
 
+    # Timer callbacks are interrupt handlers
+    # And are not allowed to allocate memory!
+    # Memory allocation can be surprising
+    # eg,
+    #   for item in data
+    # this is memory allocation! (of an iterator)
+    # you will get a 'heap locked' error
+    # the proper way is to do:
+    # for i range(0, len(data))
+    #   item = data[i] 
+
 
     # Clear callback:
     # TIM1.callback(None)

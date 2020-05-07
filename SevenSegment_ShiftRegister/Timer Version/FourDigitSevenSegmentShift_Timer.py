@@ -1,28 +1,26 @@
-# Implementation of a shift register with a thread to multiplex the 
+# Implementation of a shift register with a timer to multiplex the LEDs
 
 import pyb
 import time
 
 class FourDigitSevenSegmentShift:
-    def __init__(self, shiftreg, clkHz = 1000):
-        self.SR = shiftreg
-        self.DIGITS = "0000" # display thread checks this variable
-
-        self.CurrentDigit = 0
-
-        # 1 khz by default
-        self.DisplayTimer = pyb.Timer(1, freq=clkHz)
-        #self.DisplayTimer.callback(lambda x: self.FourDigitSevenSegmentShiftDisplay() )
-        self.DisplayTimer.callback( self.FourDigitSevenSegmentShiftDisplay_Timer )
-
-
     def show(self, digits):
         if(len(digits) != 4):
             print("Must send 4 digits")
             return -1
 
         self.DIGITS = digits
-        #self.FourDigitSevenSegmentShiftDisplay(digits)
+        self.precomputeDigitBytes()
+
+
+    # Precomputes all digits' data and control bytes to eliminate function calls by timer interrupt handler
+    def precomputeDigitBytes(self):
+        for i in range(0, 4):
+            # Data byte
+            self.SR_DATA_ALL[i*2+0] = self.getSevenSegmentDigitByte(self.DIGITS[i], DP=False)
+            # Control byte
+            self.SR_DATA_ALL[i*2+1] = self.getSevenSegmentControlByte(i, colon=False, highdot=False)
+
 
     # return 7 seg byte representation (if possible) for char
     # represents digit as a byte of on/off for A B C D E F G DP
@@ -108,7 +106,8 @@ class FourDigitSevenSegmentShift:
 
     # Show list of 4 provided digits (Multiplexed)
     # and also the colon/high dot
-    def FourDigitSevenSegmentShiftDisplay_Timer(self, timer, colon=False, highdot=False):
+    # As this method is an interrupt handler, it cannot allocate anything on the heap, nor can any function that it calls!
+    def FourDigitSevenSegmentShiftDisplay_Timer(self, timer):
         #print("Digits: " + self.DIGITS)
 
         # reset back to first digit
@@ -116,13 +115,30 @@ class FourDigitSevenSegmentShift:
             self.CurrentDigit = 0
 
         # Assemble 2 byte data/digit select sequence
-        data = bytearray(2)
-        data[0] = self.getSevenSegmentDigitByte(self.DIGITS[self.CurrentDigit], DP=False)
-        data[1] = self.getSevenSegmentControlByte(self.CurrentDigit, colon, highdot)
+        #data = bytearray(2)
+        #self.SR_DATA[0] = self.getSevenSegmentDigitByte(self.DIGITS[self.CurrentDigit], DP=False)
+        #self.SR_DATA[1] = self.getSevenSegmentControlByte(self.CurrentDigit, colon, highdot)
+
+        # To avoid function calls in this interrupt handler, we have all the data/control bytes for each digit-precomputed already
+        self.SR_DATA[0] = self.SR_DATA_ALL[self.CurrentDigit*2+0]
+        self.SR_DATA[1] = self.SR_DATA_ALL[self.CurrentDigit*2+1]
         
         # Send sequence to shift registers
-        self.SR.shiftOut(data)
+        self.SR.shiftOut(self.SR_DATA)
 
         # Display next digit on next run
         self.CurrentDigit += 1
 
+    def __init__(self, shiftreg, clkHz = 1000):
+        self.SR = shiftreg
+        self.SR_DATA = bytearray(2)
+        self.SR_DATA_ALL = bytearray(8)
+        self.DIGITS = "0000" # currently displayed digits stored here
+        self.show("8888")
+
+        self.CurrentDigit = 0
+
+        # 1 khz by default
+        self.DisplayTimer = pyb.Timer(1, freq=clkHz)
+        #self.DisplayTimer.callback(lambda x: self.FourDigitSevenSegmentShiftDisplay() )
+        self.DisplayTimer.callback( self.FourDigitSevenSegmentShiftDisplay_Timer )
