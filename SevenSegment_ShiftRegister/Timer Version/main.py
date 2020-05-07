@@ -26,6 +26,8 @@ import ShiftRegister
 import FourDigitSevenSegmentShift_Timer
 
 import micropython
+# Very useful for debugging timer callback code that doesn't work
+# Allows full traceback messages to be displayed
 micropython.alloc_emergency_exception_buf(1000)
 
 def main():
