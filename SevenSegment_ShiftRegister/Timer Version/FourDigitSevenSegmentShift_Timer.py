@@ -1,4 +1,5 @@
 # Implementation of a shift register with a timer to multiplex the LEDs
+# TODO: deinit
 
 import pyb
 import time

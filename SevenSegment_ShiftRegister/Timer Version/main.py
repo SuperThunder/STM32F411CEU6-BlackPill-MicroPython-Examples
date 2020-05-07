@@ -22,6 +22,8 @@
 
 # Implementeed but not tested: colon and high-dot functionality
 
+# TODO: deinit timer on exit
+
 import ShiftRegister
 import FourDigitSevenSegmentShift_Timer
 
