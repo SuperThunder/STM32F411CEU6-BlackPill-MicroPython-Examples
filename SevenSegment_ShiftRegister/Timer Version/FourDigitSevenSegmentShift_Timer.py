@@ -1,4 +1,5 @@
 # Implementation of a shift register with a timer to multiplex the LEDs
+# Vs _thread implementation, has cleaner code and less flicker
 # TODO: deinit
 
 import pyb
@@ -135,7 +136,6 @@ class FourDigitSevenSegmentShift:
         self.SR_DATA = bytearray(2)
         self.SR_DATA_ALL = bytearray(8)
         self.DIGITS = "0000" # currently displayed digits stored here
-        self.show("8888")
 
         self.CurrentDigit = 0
 

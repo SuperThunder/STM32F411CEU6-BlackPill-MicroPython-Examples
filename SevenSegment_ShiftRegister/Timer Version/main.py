@@ -45,6 +45,8 @@ def main():
     # non-latin characters work too :)
     #display.show(digits="三"*4)
 
+    display.show("8888")
+
     while(True):
         digits = input("Enter 4 digits to display: ")
         display.show(digits)
