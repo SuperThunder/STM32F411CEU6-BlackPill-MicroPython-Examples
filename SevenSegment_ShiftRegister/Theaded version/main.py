@@ -37,7 +37,7 @@ def main():
         #time.sleep(0.5)
 
     # non-latin characters work too :)
-    #display.show(digits="三"*4)
+    display.show(digits="三"*4)
 
     while(True):
         digits = input("Enter 4 digits to display: ")
